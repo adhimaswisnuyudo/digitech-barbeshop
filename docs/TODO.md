@@ -26,38 +26,30 @@ Acuan: [PRD.md](./PRD.md)
 
 ### 1.1 Project setup
 
-- [ ] Init Laravel di `backend/`
-- [ ] Konfigurasi Sanctum untuk mobile API
-- [ ] Prefix route `/api/v1`, JSON exception handler konsisten
-- [ ] Timezone `Asia/Jakarta`, locale `id`
-- [ ] `.env` / config database **MySQL** (`DB_CONNECTION=mysql`)
-- [ ] CORS untuk Flutter dev
+- [x] Init Laravel di `backend/`
+- [x] Konfigurasi Sanctum untuk mobile API
+- [x] Prefix route `/api/v1`, JSON exception handler konsisten
+- [x] Timezone `Asia/Jakarta`, locale `id` (`.env.example`)
+- [x] `.env` / config database **MySQL** (`DB_CONNECTION=mysql` di `.env.example`)
+- [x] CORS default Laravel (native Flutter tidak wajib; siap untuk web client)
 
 ### 1.2 Konvensi data (UUID + blameable)
 
-- [ ] Trait `RecordsBlameable` (isi `created_by` / `updated_by` dari `auth()->user()->name`, sistem = `System`)
-- [ ] Base model / migration helper: UUID PK + 4 kolom blameable di setiap tabel
-- [ ] Seed user admin bootstrap + 1 cabang contoh (opsional)
+- [x] Trait `RecordsBlameable` + `BlameableColumns` migration helper
+- [x] Base model UUID + blameable
+- [x] Seed admin + 1 cabang demo + 2 barber + 3 layanan
 
 ### 1.3 Migrasi & model inti
 
-- [ ] Migration + model: `users` (role, email, password, google_sub, name, whatsapp_number, branch_id)
-- [ ] Migration + model: `branches` (address, lat, lng, opening_hours, timezone, is_active)
-- [ ] Migration + model: `services`
-- [ ] Migration + model: `barbers`, `barber_schedules`, `barber_time_off`
-- [ ] Migration + model: `bookings`, `booking_services`
-- [ ] Migration + model: `notifications` (atau fase notifikasi)
-- [ ] Factory & seeder data demo (1 cabang, 3 layanan, 2 barber, jadwal)
+- [x] `users`, `branches`, `services`, `barbers`, `barber_schedules`, `barber_time_off`
+- [x] `bookings`, `booking_services`, `notifications`
+- [x] Factory & seeder demo
 
 ### 1.4 Auth & profil API
 
-- [ ] `POST /auth/register` (customer + WhatsApp + blameable)
-- [ ] `POST /auth/login`
-- [ ] `POST /auth/google` (verifikasi ID token)
-- [ ] `POST /auth/logout`
-- [ ] `GET/PUT /profile` (gate WhatsApp format E.164, unik)
-- [ ] Middleware RBAC: `customer`, `staff`, `admin`
-- [ ] Policy: staff hanya akses cabang/barber assigned
+- [x] `POST /auth/register`, `/login`, `/google`, `/logout`
+- [x] `GET/PUT /profile` (WhatsApp E.164 + unik)
+- [x] Middleware alias `role` + `BarberPolicy` (staff scope cabang/barber)
 - [ ] Should: `POST /auth/forgot-password`
 
 ---
@@ -66,40 +58,39 @@ Acuan: [PRD.md](./PRD.md)
 
 ### 2.1 Cabang & layanan
 
-- [ ] `GET /branches`, `GET /branches/{id}` (publik/customer)
-- [ ] `GET /services` (hanya aktif)
-- [ ] Admin CRUD cabang (lat/lng wajib jika aktif)
-- [ ] Admin CRUD layanan
+- [x] `GET /branches`, `GET /branches/{id}` (publik)
+- [x] `GET /services` (hanya aktif)
+- [x] Admin CRUD cabang (lat/lng wajib jika aktif)
+- [x] Admin CRUD layanan
 
 ### 2.2 Availability & booking
 
-- [ ] Service/logic: hitung slot (jam buka cabang + jadwal barber + durasi + buffer 5 menit − booking existing)
-- [ ] `GET /availability`
-- [ ] `POST /bookings` (auto-confirm, tolak bentrok, gate `WHATSAPP_REQUIRED`)
-- [ ] `GET /bookings`, `GET /bookings/{id}` (scope per role)
-- [ ] `POST /bookings/{id}/cancel` (kebijakan 2 jam customer)
-- [ ] `PATCH /bookings/{id}/status` (staff: in_progress, completed, no_show)
-- [ ] Admin: buat manual, reschedule, cancel override
+- [x] `AvailabilityService` (jam buka + jadwal barber + buffer 5 menit)
+- [x] `GET /availability`
+- [x] `POST /bookings` (auto-confirm, bentrok ditolak, `WHATSAPP_REQUIRED`)
+- [x] `GET /bookings`, `GET /bookings/{id}` (scope role)
+- [x] `POST /bookings/{id}/cancel` (kebijakan 2 jam customer)
+- [x] `PATCH /bookings/{id}/status` (staff/admin)
+- [x] Admin: booking manual + `PATCH /admin/bookings/{id}` reschedule
 
 ### 2.3 Admin & dashboard
 
-- [ ] Admin CRUD barber + link user staff
-- [ ] Admin kelola `barber_schedules` & `barber_time_off`
-- [ ] `GET /admin/dashboard` — booking hari ini, occupancy mingguan, no-show rate
-- [ ] Should: konfigurasi offset reminder (setting sederhana)
+- [x] Admin CRUD barber + jadwal + time off
+- [x] `GET /admin/dashboard`
+- [ ] Should: konfigurasi offset reminder via env (`BOOKING_REMINDER_HOURS`)
 
 ### 2.4 Notifikasi
 
-- [ ] Integrasi FCM (simpan device token user)
-- [ ] Queue job: push saat booking confirmed
-- [ ] Scheduled job: reminder (24 jam & 2 jam — sesuai config)
+- [x] `POST /devices` (FCM token)
+- [x] Job push booking confirmed (+ log jika `FCM_SERVER_KEY` kosong)
+- [x] Command `bookings:send-reminders` + schedule 15 menit
 - [ ] Should: push saat admin reschedule/cancel
 
 ### 2.5 Kualitas backend
 
-- [ ] Feature tests: auth, availability, double-book ditolak, RBAC
-- [ ] PHPUnit/Pest untuk blameable & UUID di response JSON
-- [ ] Deploy staging + dokumentasi run migration/seed
+- [x] Feature tests: availability, double-book, WhatsApp gate, RBAC admin
+- [x] `php artisan test` (9 tests)
+- [ ] Deploy staging + dokumentasi ops (manual)
 
 ---
 
@@ -107,59 +98,61 @@ Acuan: [PRD.md](./PRD.md)
 
 ### 3.1 Project setup
 
-- [ ] Init Flutter di `mobile/`
-- [ ] Struktur folder: `core/`, `features/`, `data/`, `domain/` (atau konvensi setara)
-- [ ] API client (Dio/http) + interceptor token Sanctum
-- [ ] Routing (Bahasa Indonesia)
-- [ ] `AppColors` + `ThemeData` + **Plus Jakarta Sans** sesuai [DESIGN.md](./DESIGN.md)
-- [ ] Env: base URL API, Google Sign-In client IDs (iOS/Android)
+- [x] Init Flutter di `mobile/`
+- [x] Struktur folder: `core/`, `features/`, `data/` (+ model domain ringan)
+- [x] API client (Dio) + interceptor token Sanctum
+- [x] Routing (Bahasa Indonesia) + redirect auth/WhatsApp
+- [x] `AppColors` + `ThemeData` + **Plus Jakarta Sans** sesuai [DESIGN.md](./DESIGN.md)
+- [x] Env: `env.example.json` + `--dart-define-from-file` (base URL, Google, Firebase id)
 
 ### 3.2 Auth & profil (customer)
 
-- [ ] Layar login & registrasi email/password
-- [ ] Google Sign-In → `POST /auth/google`
-- [ ] Layar lengkapi WhatsApp (gate global sebelum booking)
-- [ ] Layar profil (edit nama, WhatsApp)
-- [ ] Persistensi token aman (flutter_secure_storage)
+- [x] Layar login & registrasi email/password
+- [x] Google Sign-In → `POST /auth/google` (butuh client IDs di env)
+- [x] Layar lengkapi WhatsApp (gate global sebelum booking)
+- [x] Layar profil (edit nama, WhatsApp)
+- [x] Persistensi token aman (flutter_secure_storage)
 
 ### 3.3 Customer — cabang & peta
 
-- [ ] Daftar / detail cabang
-- [ ] Integrasi `flutter_map` + tile OSM + marker
-- [ ] Atribusi OSM di UI
-- [ ] Should: tombol buka navigasi eksternal (maps/Waze)
-- [ ] Fallback alamat teks jika tile gagal
+- [x] Daftar / detail cabang
+- [x] Integrasi `flutter_map` + tile OSM + marker
+- [x] Atribusi OSM di UI
+- [x] Should: tombol buka navigasi eksternal (maps/Waze)
+- [x] Fallback alamat teks jika tile gagal
 
 ### 3.4 Customer — booking
 
-- [ ] Katalog layanan
-- [ ] Pilih barber (spesifik / any available)
-- [ ] Kalender / picker slot dari API availability
-- [ ] Konfirmasi booking (Bayar di tempat)
-- [ ] Riwayat booking + cancel
+- [x] Katalog layanan
+- [x] Pilih barber (spesifik / any available)
+- [x] Kalender / picker slot dari API availability
+- [x] Konfirmasi booking (Bayar di tempat)
+- [x] Riwayat booking + cancel
 
 ### 3.5 Staff
 
-- [ ] Login staff (email/password)
-- [ ] Jadwal hari ini + detail booking (termasuk WhatsApp pelanggan)
-- [ ] Aksi status: mulai, selesai, no-show
+- [x] Login staff (email/password)
+- [x] Jadwal hari ini + detail booking (termasuk WhatsApp pelanggan)
+- [x] Aksi status: mulai, selesai, no-show
 
 ### 3.6 Admin (role di app Flutter — MVP)
 
-- [ ] Login admin
-- [ ] CRUD layanan & cabang (termasuk lat/lng)
-- [ ] Kelola barber & jadwal (minimal)
-- [ ] Daftar semua booking + override cancel/reschedule
-- [ ] Dashboard ringkas (angka dari API)
+- [x] Login admin
+- [x] Daftar layanan (aktif/nonaktif) + daftar cabang (read-only lat/lng)
+- [ ] Should: form tambah/edit cabang & barber di app
+- [x] Daftar semua booking + cancel (admin)
+- [x] Dashboard ringkas (angka dari API)
 
 ### 3.7 Push notification
 
-- [ ] Setup Firebase di Flutter (iOS + Android)
-- [ ] Register FCM token ke backend
+- [x] Helper `PushRegistration` → `POST /devices` (siap dipanggil dengan token FCM)
+- [ ] Setup Firebase di Flutter (iOS + Android) + `firebase_messaging`
+- [ ] Register FCM token otomatis setelah login
 - [ ] Handle notifikasi foreground/background (buka detail booking)
 
 ### 3.8 Kualitas mobile
 
+- [x] Smoke widget test (layar login)
 - [ ] Widget/integration test kritikal (auth gate, booking flow mock API)
 - [ ] Build release internal (TestFlight / internal app sharing)
 
@@ -208,4 +201,4 @@ Acuan: [PRD.md](./PRD.md)
 |---------|---------|
 | 2025-11-02 | Todo list awal dibuat |
 | 2025-11-02 | MySQL; warna `#404040` / `#5E5E5E` |
-| 2025-11-02 | Monorepo: README + .gitignore root |
+| 2025-11-02 | Fase 3 mobile: scaffold Flutter + analyze/test hijau; admin list layanan/cabang/booking |

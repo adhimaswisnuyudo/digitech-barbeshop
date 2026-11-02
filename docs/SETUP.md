@@ -10,7 +10,7 @@ Acuan: [README.md](../README.md) · [DECISIONS.md](./DECISIONS.md)
 
 - [x] Git init di root monorepo
 - [x] Remote: `git remote add origin https://github.com/adhimaswisnuyudo/digitech-barbeshop.git`
-- [ ] Push pertama: commit di root lalu `git push -u origin main`
+- [x] Push pertama ke `origin/main` (commit monorepo Fase 0)
 
 ---
 
